@@ -29,13 +29,13 @@ func (c *Client) CurrentUserRepos() (repos Repos, err error) {
 		return
 	}
 	res,err := c.Get("user/repos")
+	defer res.Response.Body.Close()
 	if err != nil { return }
 	var r Repos
 	var dec *json.Decoder
 	for res != nil {
-		dec = json.NewDecoder(res.rawResponse.Body)
+		dec = json.NewDecoder(res.Response.Body)
 		err = dec.Decode(&r)
-		res.rawResponse.Body.Close()
 		if err != nil { return nil,err }
 		repos = append(repos,r...)
 		res = res.NextPage()
@@ -48,16 +48,16 @@ func (c *Client) UserRepos(login string) (repos Repos, err error) {
 	if err != nil {
 		res,err = c.Get(fmt.Sprintf("users/%s/repos",login))
 	} else {
-		res.rawResponse.Body.Close()
+		res.Response.Body.Close()
 		res,err = c.Get(fmt.Sprintf("orgs/%s/repos",login))
 	}
+	defer res.Response.Body.Close()
 	if err != nil { return }
 	var r Repos
 	var dec *json.Decoder
 	for res != nil {
-		dec = json.NewDecoder(res.rawResponse.Body)
+		dec = json.NewDecoder(res.Response.Body)
 		err = dec.Decode(&r)
-		res.rawResponse.Body.Close()
 		if err != nil { return nil,err }
 		repos = append(repos,r...)
 		res = res.NextPage()
@@ -68,8 +68,8 @@ func (c *Client) UserRepos(login string) (repos Repos, err error) {
 func (c *Client) GetRepo(login string, reponame string) (repo *Repo, err error) {
 	res,err := c.Get(fmt.Sprintf("repos/%s/%s",login,reponame))
 	if err != nil { return }
-	defer res.rawResponse.Body.Close()
-	dec := json.NewDecoder(res.rawResponse.Body)
+	defer res.Response.Body.Close()
+	dec := json.NewDecoder(res.Response.Body)
 	err = dec.Decode(&repo)
 	return
 }

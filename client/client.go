@@ -46,7 +46,7 @@ type Client struct {
 	username string
 	token string
 	CallsLimit, CallsRemaining int
-	httpClient *http.Client
+	*http.Client
 }
 
 func New(endpoint string, authtype authTypes, username string, token string) (client *Client,err error) {
@@ -79,7 +79,7 @@ func New(endpoint string, authtype authTypes, username string, token string) (cl
 	default:
 		return nil, UnknownAuthMethod
 	}
-	client = &Client{endpoint: endpoint_uri, username: username, token: token, authtype: authtype, httpClient: &http.Client{}}
+	client = &Client{endpoint: endpoint_uri, username: username, token: token, authtype: authtype, Client: &http.Client{}}
 	return client, nil
 }
 
@@ -109,7 +109,7 @@ func (c *Client) makeRequest(method, api_path string,body io.Reader) (req *http.
 
 type Response struct {
 	client *Client
-	rawResponse *http.Response
+	*http.Response
 	CallsLimit, CallsRemaining int
 	FirstPage, LastPage, NextPage, PrevPage func() *Response
 }
@@ -131,7 +131,7 @@ func newResponse(c *Client, r *http.Response) (res *Response, err error) {
 	res = new(Response)
 	linkRE, _ := regexp.Compile("<(.*)>; rel=\"(.*)\"")
 	res.client = c
-	res.rawResponse = r
+	res.Response = r
 	if res.CallsLimit,err = strconv.Atoi(r.Header.Get("X-Ratelimit-Limit")); err != nil {
 		return nil,errors.New("Cannot find current API call limit!")
 	}
@@ -177,7 +177,7 @@ func newResponse(c *Client, r *http.Response) (res *Response, err error) {
 }
 
 func (c *Client) Do(req *http.Request) (res *Response, err error) {
-	resp, err := c.httpClient.Do(req)
+	resp, err := c.Client.Do(req)
 	if err != nil {
 		return
 	}
@@ -200,7 +200,7 @@ func (c *Client) Ping() (ok bool) {
 		fmt.Print(err)
 		return false
 	}
-	defer res.rawResponse.Body.Close()
-	ok = res.rawResponse.StatusCode == 200
+	defer res.Response.Body.Close()
+	ok = res.Response.StatusCode == 200
 	return
 }

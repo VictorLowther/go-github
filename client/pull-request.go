@@ -46,9 +46,9 @@ func (c *Client) GetPullRequests(login, repo, state string) (pulls PullRequests,
 	var p PullRequests
 	var dec *json.Decoder
 	for res != nil {
-		dec = json.NewDecoder(res.rawResponse.Body)
+		dec = json.NewDecoder(res.Response.Body)
 		err = dec.Decode(&p)
-		res.rawResponse.Body.Close()
+		res.Response.Body.Close()
 		if err != nil { return nil,err }
 		pulls = append(pulls,p...)
 		res = res.NextPage()
@@ -59,8 +59,8 @@ func (c *Client) GetPullRequests(login, repo, state string) (pulls PullRequests,
 func (c *Client) GetPullRequest(login, repo string, id int) (pull *PullRequest, err error) {
 	res,err := c.Get(fmt.Sprintf("repos/%s/%s/pulls/%d",login,repo,id))
 	if err != nil { return }
-	defer res.rawResponse.Body.Close()
-	dec := json.NewDecoder(res.rawResponse.Body)
+	defer res.Response.Body.Close()
+	dec := json.NewDecoder(res.Response.Body)
 	err = dec.Decode(&pull)
 	return
 }

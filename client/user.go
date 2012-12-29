@@ -32,11 +32,11 @@ func (c *Client) CurrentUser() (user *User, err error) {
 	}
 	res,err := c.Get("user")
 	if err != nil { return }
-	defer res.rawResponse.Body.Close()
-	if res.rawResponse.StatusCode != 200 {
+	defer res.Response.Body.Close()
+	if res.Response.StatusCode != 200 {
 		return nil,errors.New("Error getting the current user!")
 	}
-	dec := json.NewDecoder(res.rawResponse.Body)
+	dec := json.NewDecoder(res.Response.Body)
 	err = dec.Decode(&user)
 	return
 }
@@ -44,8 +44,8 @@ func (c *Client) CurrentUser() (user *User, err error) {
 func (c *Client) GetUser(login string) (user *User, err error) {
 	res,err := c.Get(fmt.Sprintf("users/%s",login))
 	if err != nil { return }
-	defer res.rawResponse.Body.Close()
-	dec := json.NewDecoder(res.rawResponse.Body)
+	defer res.Response.Body.Close()
+	dec := json.NewDecoder(res.Response.Body)
 	err = dec.Decode(&user)
 	return
 }
